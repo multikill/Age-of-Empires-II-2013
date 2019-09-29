@@ -113,7 +113,7 @@ void RunHack()
 		if (ImGui::Begin("Age of Empires 2 HD", &openOverlay, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
 		{
 			for (int i = 0; i < totalPlayers; i++)
-			{
+			{			
 				
 				createPlayerTreeNode(playerArray->playerData[i].player);
 			}
@@ -128,6 +128,10 @@ void RunHack()
 				ImGui::Text("Gold:  %i", static_cast<int>(res.gold));
 				ImGui::Text("Stone: %i", static_cast<int>(res.stone));
 				ImGui::TreePop();
+			}
+			if (ImGui::Button("Idle Civilian go home"))
+			{
+				IdleCivilianGoHome(playerArray->playerData[0].player);
 			}
 			if (ImGui::Button("Maphack"))
 			{

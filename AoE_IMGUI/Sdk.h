@@ -31,12 +31,6 @@ std::vector<Unit*> getCivilianList(Player* player)
 {
 	std::vector<Unit*> civilian;
 
-	static Main* main = reinterpret_cast<Main*>((DWORD)GetModuleHandle(NULL) + Offsets::main);
-	static int totalPlayers = *reinterpret_cast<int*>((DWORD)GetModuleHandle(NULL) + Offsets::totalPlayers);
-
-	static GameData* gameData = main->GameData;
-	static PlayerArray* playerArray = gameData->pPlayerArray;
-
 	for (int i = 0; i < player->objectManager->iObjectCount; i++)
 	{
 		Unit* unit = player->objectManager->untis[i];
@@ -99,8 +93,8 @@ class Ressources getCivilianDistribution(Player* player)
 
 		if (!target)
 			continue;
-
-		if (!target->pTargetData->pTargetUnit)
+		
+ 		if (!target->pTargetData->pTargetUnit)
 			continue;
 
 		EnumUnitDataClass targetClass = static_cast<EnumUnitDataClass>(target->pTargetData->pTargetUnit->pUnitData->Class);
@@ -123,4 +117,52 @@ class Ressources getCivilianDistribution(Player* player)
 	}
 
 	return res;
+}
+
+std::vector<Unit*> getObjects(Player* player)
+{
+	std::vector<Unit*> objects;
+
+	for (int i = 0; i < player->objectManager->iObjectCount; i++)
+	{
+		Unit* unit = player->objectManager->untis[i];
+
+		if (!unit)
+			continue;
+
+		if (unit->pOwner != player)
+			continue;
+
+		objects.push_back(unit);
+	}
+
+	return objects;
+}
+
+void UnitGoTo(Unit* unit, float xPos, float yPos)
+{
+	UnitFunction* uFuncPtr = reinterpret_cast<UnitFunction*>((DWORD)GetModuleHandle(NULL) + &unit);
+	move executeMove = reinterpret_cast<move>(unit->pUnitFunction->moveFunction);
+	executeMove(unit, 0, xPos, yPos, 0.0f);
+}
+
+void IdleCivilianGoHome(Player* player)
+{
+	std::vector<Unit*> idle = getIdleCivilianList(player);
+	std::vector<Unit*> objects = getObjects(player);
+	Vector3 destination(50.0f, 50.0f, 0.0f);
+
+	for (auto o : objects)
+	{
+		if (!strcmp(o->pUnitData->name, "RTWC")) // TownCenter
+		{
+			destination = o->vPosReadOnly;
+			break;
+		}
+	}
+
+	for (auto c : idle)
+	{
+		UnitGoTo(c, destination.x, destination.y);
+	}
 }

@@ -262,16 +262,40 @@ public:
 	char pad_000C[4]; //0x000C
 }; //Size: 0x0010
 
+class Unit;
+class UnitFunction;
+class AVRGE_Action;
+
+typedef int(__thiscall* executeWalk)(Unit* Civilian, AVRGE_Action* pToAction); // pUnit = this ptr = ecx
+typedef int(__thiscall* walkFunction)(Unit* Civilian, int status, int oldStatus, float x, float y, float z); // pUnit = this ptr = ecx // status = 1 // oldStatus = 0
+typedef void(__thiscall* move)(Unit* Civilian, int i, float x, float y, float z);
+
+
+class UnitFunction
+{
+public:
+	char pad_0x0000[0xAC]; //0x0000
+	move moveFunction; //0x00AC 
+	char pad_0x00B0[0x278]; //0x00B0
+	executeWalk executeWalkFunc; //0x0328 
+	char pad_0x032C[0xC]; //0x032C
+	walkFunction walFunctionFunc; //0x0338 
+	char pad_0x033C[0x1C8]; //0x033C
+
+}; //Size=0x0504
+
+
 class Unit
 {
 public:
-	char pad_0000[8]; //0x0000
+	class UnitFunction *pUnitFunction;
+	char pad_0000[4]; //0x0004
 	int32_t iNetworkID; //0x0008
 	class UnitData *pUnitData; //0x000C
 	void *pOwner; //0x0010
 	void *currentGraphicPtr; //0x0014
 	void *currentGraphic2Ptr; //0x0018
-	char pad_001C[24]; //0x001C
+	char pad_001C[24]; //0x001C // ActionList
 	float fHealth; //0x0034
 	int16_t unk_38; //0x0038
 	int16_t bIsSelected; //0x003A
@@ -588,11 +612,18 @@ public:
 	char pad_0000[4]; //0x0000
 }; //Size: 0x0004
 
-class TargetPtr
+class Action
+{
+	class ActionList* pActionList;
+	int status;
+};
+
+class TargetPtr // Action List
 {
 public:
 	char pad_0000[8]; //0x0000
 	class Target *pTarget; //0x0008
+	class Action *nextAction;
 }; //Size: 0x000C
 
 class Target
